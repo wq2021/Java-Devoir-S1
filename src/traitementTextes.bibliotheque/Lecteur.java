@@ -1,5 +1,7 @@
 package traitementTextes.bibliotheque;
 
+import java.util.Comparator;
+
 public class Lecteur {
 	
 	private String nom;
@@ -48,5 +50,11 @@ public class Lecteur {
 	public double paieAmende(Amende amende)
 	{
 		return amende.getAmende();
+	}
+}
+
+class CompareLecteur implements Comparator<Lecteur>{
+	public int compare(Lecteur lecteur1, Lecteur lecteur2) {
+		return lecteur1.getNom().compareTo(lecteur2.getNom());
 	}
 }

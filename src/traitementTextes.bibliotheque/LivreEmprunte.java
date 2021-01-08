@@ -2,14 +2,14 @@ package traitementTextes.bibliotheque;
 
 import java.time.LocalDate;
 
-public class LivreEmprunte extends Livre {
+public class LivreEmprunte {
 	
 	private LocalDate dateEmprunt;
 	private int nbJourEmprunt;
 	private Lecteur lecteur;
+	private Livre livre;
 	
-	public LivreEmprunte(Auteur auteur, String titre) {
-		super(auteur, titre);
+	public LivreEmprunte() {
 	}
 	
 	public LocalDate getDateEmprunt() {
@@ -35,4 +35,12 @@ public class LivreEmprunte extends Livre {
 	public void setLecteur(Lecteur lecteur) {
 		this.lecteur = lecteur;
 	}
+	
+	public Livre getLivre() {
+		return livre;
+	}
+
+	public void setLivre(Livre livre) {
+		this.livre = livre;
+	}	
 }

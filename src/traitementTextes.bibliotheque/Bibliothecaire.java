@@ -35,7 +35,6 @@ public class Bibliothecaire {
 			getCatalogue().put(nouveauLivre.getAuteur(), livres);
 			tresorerie -= 10;
 		}
-
 	}
 
 	public String listerOeuvresAuteur(Auteur auteur) {
@@ -53,33 +52,24 @@ public class Bibliothecaire {
 		}
 	}
 	
-	public void preterLivre(Livre livre, Lecteur lecteur) {
-		// on vérifie que le livre n'a pas été déjà emprunté 
-		if (getLivresEmpruntes().contains(livre.getTitre()))
-		{
-			// throw exception
-		}
+	public void preterLivre(Livre livre, Lecteur lecteur) throws Exception {
+		VerifierSiLivreExisteDansCatalogue(livre);
+		VerifierSiLecteurADejaEmprunteLivre(lecteur);
+		VerifierSiLivreDejaEmprunte(livre);
 		
-		// on vérifie que le lecteur a déjà emprunté un livre 
-		if (Objects.isNull(retourneLivreEmprunte(lecteur)))
-		{
-			// throw exception
-		}
-		
-		LivreEmprunte livreEmprunte = buildLivreEmprunte(livre);
+		LivreEmprunte livreEmprunte = new LivreEmprunte();
 		livreEmprunte.setNbJourEmprunt(getNbJourEmprunt());
 		livreEmprunte.setLecteur(lecteur);
 		livreEmprunte.setDateEmprunt(LocalDate.now());
+		livreEmprunte.setLivre(livre);
 		getLivresEmpruntes().add(livreEmprunte);
 	}
 	
 	public void RelancerEmprunteurEnRetard() {
-		for(LivreEmprunte livreEmprunte : getLivresEmpruntes())
-		{
+		for(LivreEmprunte livreEmprunte : getLivresEmpruntes()){
 			LocalDate dateEmprunt = livreEmprunte.getDateEmprunt();
 			Period p = Period.between(dateEmprunt, LocalDate.now());
-			if (p.getDays() >= getNbJourEmprunt())
-			{
+			if (p.getDays() >= getNbJourEmprunt()){
 				Lecteur lecteur = livreEmprunte.getLecteur();
 				lecteur.setLivreEnRetard(true);
 			}
@@ -88,8 +78,7 @@ public class Bibliothecaire {
 	
 	public ArrayList<Lecteur> ListerPersonnesAyantEmpruntesUnLivre() {
 		ArrayList<Lecteur> listeLecteur = new ArrayList<Lecteur>();
-		for(LivreEmprunte livreEmprunte : getLivresEmpruntes())
-		{
+		for(LivreEmprunte livreEmprunte : getLivresEmpruntes()){
 			listeLecteur.add((livreEmprunte.getLecteur()));
 		}
 			
@@ -156,48 +145,43 @@ public class Bibliothecaire {
 		return "Il y a "+n+" livres sur le theme \""+ theme +"\". Les livres sont : \n"+ listeLivres;
 	}
 
-
-	public void EnvoyerAmendeRetardaire() {
+	public void EnvoyerAmendeRetardaire() throws Exception {
 		for(LivreEmprunte livreEmprunte : getLivresEmpruntes())
 		{
 			Lecteur lecteur = livreEmprunte.getLecteur();
-			if (lecteur.aLivreEnRetard())
-			{
-				LocalDate dateEmprunt = livreEmprunte.getDateEmprunt();
-				Period p = Period.between(dateEmprunt, LocalDate.now());
-				Amende amende = new Amende(p.getDays());
-				lecteur.setAmende(amende);
+			if (!lecteur.aLivreEnRetard()) {
+				throw new Exception("Le lecteur '" + lecteur.getNom() +"' n'est pas en retard.");
 			}
+								
+			LocalDate dateEmprunt = livreEmprunte.getDateEmprunt();
+			Period p = Period.between(dateEmprunt, LocalDate.now());
+			Amende amende = new Amende(p.getDays());
+			lecteur.setAmende(amende);
 		}
 	}
 
-	public void EncaisserAmendeRetardaire(Lecteur lecteur) {
+	public void EncaisserAmendeRetardaire(Lecteur lecteur) throws Exception {
 		Amende amende = lecteur.getAmende();
-		if (Objects.isNull(amende))
-		{
-			// Throw exception
+		if (Objects.isNull(amende)){
+			throw new Exception("Le lecteur '" + lecteur.getNom() +"' n'a pas d'amende à payer.");
 		}
 		
 		double amendePayee = lecteur.paieAmende(amende);
-		if (amendePayee != amende.getAmende())
-		{
-			// Throw exception
-		}
-		
+		if (amendePayee != amende.getAmende()){
+			throw new Exception("Le lecteur '" + lecteur.getNom() +"' n'a pas payé le montant de l'amende. Montant dû : " + amende.getAmende() + ", montant payé : " + amendePayee);
+		}		
 		tresorerie += amendePayee;
 		lecteur.setAmende(null);
 		lecteur.setLivreEnRetard(false);
 	}
-	
 
-	public HashMap<Auteur, ArrayList<Livre>> getCatalogue() {
+	private HashMap<Auteur, ArrayList<Livre>> getCatalogue() {
 		return catalogue;
 	}
 	
-	public HashSet<LivreEmprunte> getLivresEmpruntes() {
+	private HashSet<LivreEmprunte> getLivresEmpruntes() {
 		return livresEmpruntes;
-	}
-	
+	}	
 
 	public void initialiserCatalogue(HashMap<Auteur, ArrayList<Livre>> catalogue) {
 		this.catalogue = catalogue;
@@ -207,33 +191,41 @@ public class Bibliothecaire {
 		return 15;
 	}
 	
-	public LivreEmprunte retourneLivreEmprunte(Lecteur lecteur)
-	{
-		for(LivreEmprunte livreEmprunte : getLivresEmpruntes())
-		{
+	public LivreEmprunte retourneLivreEmprunte(Lecteur lecteur){
+		for(LivreEmprunte livreEmprunte : getLivresEmpruntes()){
 			Lecteur lecteurCourant = livreEmprunte.getLecteur();
 			if ( lecteurCourant.equals(lecteur) ) {
 				return livreEmprunte;
 			}
-		}
-			
+		}		
 		return null;
 	}
-		
-	public void supprimeTout()
-	{
+	
+	//pour initialiser le catalogue et tout tester individuellement
+	public void supprimeTout() {
 		getCatalogue().clear();
 		getLivresEmpruntes().clear();
 	}
-		
-	private LivreEmprunte buildLivreEmprunte( Livre livre) {
-		LivreEmprunte livreEmprunte = new LivreEmprunte(livre.getAuteur(), livre.getTitre());
-		livreEmprunte.setAnneePublication(livre.getAnneePublication());
-		livreEmprunte.setResume(livre.getResume());
-		livreEmprunte.setNbTomes(livre.getNbTomes());
-		livreEmprunte.setLangue(livre.getLangue());
-		livreEmprunte.setTheme(livre.getTheme());
-		
-		return livreEmprunte;
+	
+	void VerifierSiLivreDejaEmprunte(Livre livre) throws Exception {
+		// on vérifie que le livre n'a pas été déjà emprunté 
+		if (getLivresEmpruntes().contains(livre)){
+			throw new Exception("Le livre '" + livre.getTitre() +"' a déjà été emprunté."); 
+		}		
+	}
+
+	void VerifierSiLecteurADejaEmprunteLivre(Lecteur lecteur) throws Exception {
+		// on vérifie que le lecteur a déjà emprunté un livre 
+		if (Objects.isNull(retourneLivreEmprunte(lecteur))){
+			throw new Exception("Le lecteur '" + lecteur.getNom() +"' a déjà emprunté un livre.");
+		}		
+	}
+
+	void VerifierSiLivreExisteDansCatalogue(Livre livre) throws Exception {
+		// on vérifie si le livre existe bien dans le catalogue
+		ArrayList<Livre> listeLivre = getCatalogue().get(livre.getAuteur());
+		if (listeLivre.contains(livre)){
+			throw new Exception("Le livre '" + livre.getTitre() +"' n'est pas dans le catalogue.");
+		}		
 	}
 }

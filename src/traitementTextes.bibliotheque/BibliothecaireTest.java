@@ -7,7 +7,9 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Objects;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,22 +33,18 @@ class BibliothecaireTest {
 	
 	@Test
 	void testAfficherOeuvresAuteur() {
-		
 		//GIVEN
-		Auteur auteur=new Auteur("nomAuteur");
-		ArrayList<Livre> livres=new ArrayList<>();
-		String titre = "un titre presomptueux";
-		Livre premierLivre=new Livre(auteur, titre);
-		livres.add(premierLivre);
-		//bibliothecaire.supprimeTout(); 
-		bibliothecaire.getCatalogue().put(auteur, livres);
+		// !! remplacer partout comme ça pour gagner des lignes vides
+		bibliothecaire.supprimeTout();
+		Livre livre = creerLivre("nomAuteur", "Un titre présomptueux");
+		bibliothecaire.ajouterLivre(livre);
 		
 		//WHEN
-		String listeOeuvres = bibliothecaire.listerOeuvresAuteur(auteur);
+		String listeOeuvres = bibliothecaire.listerOeuvresAuteur(livre.getAuteur());
 		
 		//THEN
 		assertNotNull(listeOeuvres);
-		assertTrue(listeOeuvres.contains(titre));
+		assertTrue(listeOeuvres.contains(livre.getTitre()));
 		System.out.println(listeOeuvres);
 	}
 	
@@ -54,13 +52,11 @@ class BibliothecaireTest {
 	@Test
 	void testAjouterLivre() {
 		//GIVEN
+		bibliothecaire.supprimeTout();
 		Auteur auteur = new Auteur("nomAuteur");
-		//ArrayList<Livre> livres = new ArrayList<>();
 		String titre = "Un titre";
 		Livre nouveauLivre = new Livre(auteur, titre);
-		//livres.add(nouveauLivre);
 		int ancienMontant = bibliothecaire.getTresorerie();
-		//bibliothecaire.supprimeTout(); 
 		
 		//WHEN
 		bibliothecaire.ajouterLivre(nouveauLivre);
@@ -79,7 +75,6 @@ class BibliothecaireTest {
 		Auteur auteur = new Auteur("nomAuteur");
 		String titre = "Un titre";
 		Livre ancienLivre = new Livre(auteur, titre);
-		//bibliothecaire.supprimeTout(); 
 		bibliothecaire.ajouterLivre(ancienLivre);
 		
 		//WHEN
@@ -90,8 +85,6 @@ class BibliothecaireTest {
 		assertEquals(bibliothecaire.getCatalogue().get(ancienLivre.getAuteur()).size(), 0);
 	}
 
-	
-	
 	/*
 	 * 
 	 * Partie concernee par le devoir
@@ -121,64 +114,133 @@ class BibliothecaireTest {
 		Lecteur lecteur = new Lecteur("prenom", "nom");
 		Livre ancienLivre = new  Livre(auteur, titre);
 		//bibliothecaire.supprimeTout(); //WHYY
-		
-		//WHEN
-		bibliothecaire.preterLivre(ancienLivre, lecteur);
+		Lecteur lecteur2 = new Lecteur("prenom2", "nom2");
+		String titre2 = "Un titre2";
+		Livre ancienLivre2 = new  Livre(auteur, titre2);
+		String titre3 = "Un titre2";
+		Livre ancienLivre3 = new  Livre(auteur, titre3);
+
+		// WHEN
+		boolean exceptionLeve = preterLivreTest(ancienLivre, lecteur);
 		
 		//THEN
-		// Il faudrait quand même tester les dates nan ?
-		//assertTrue(lecteur.getLivreEmprunte().equals(ancienLivre));
-		//assertTrue(lecteur.getRetourPrevu() == 15);
-		//assertTrue(lecteur.getDateEmprunt().equals("aujourd'hui"));
-		Livre livre = (Livre) bibliothecaire.retourneLivreEmprunte(lecteur);
-		assertTrue(livre.equals(ancienLivre));
+		assertFalse(exceptionLeve);
+		LivreEmprunte livreEmprunte =  bibliothecaire.retourneLivreEmprunte(lecteur);
+		assertTrue(Objects.nonNull(livreEmprunte));
+		Livre livreBiblio = livreEmprunte.getLivre();
+		assertEquals(livreBiblio,ancienLivre);
+		assertEquals(livreBiblio.getAuteur(),auteur);
+		assertEquals(livreEmprunte.getDateEmprunt(),LocalDate.now());
+		assertEquals(livreEmprunte.getNbJourEmprunt(), bibliothecaire.getNbJourEmprunt());
+		assertEquals(livreEmprunte.getLecteur(),lecteur);
+				
+		// WHEN 
+		boolean exceptionLeveLivreDejaEmp = preterLivreTest(ancienLivre, lecteur2);
+		// THEN		
+		assertTrue(exceptionLeveLivreDejaEmp);
+		
+		// !! rajouter le reste des exceptions
+		
 	}
 	
 	@Test
 	void testRelancerEmprunteurEnRetard() {
 		// premier scenario : pas de retard
-				//GIVEN
-				Lecteur lecteur = new Lecteur("prenom", "nom");	
-				
-				Auteur auteur = new Auteur("nomAuteur");
-				String titre = "Un titre";
-				Livre livre = new Livre(auteur, titre);
-				//bibliothecaire.supprimeTout();
-				bibliothecaire.preterLivre(livre, lecteur);
+		//GIVEN
+		Lecteur lecteur = new Lecteur("prenom", "nom");		
+		Auteur auteur = new Auteur("nomAuteur");
+		String titre = "Un titre";
+		Livre livre = new Livre(auteur, titre);
+		//bibliothecaire.supprimeTout();
+		boolean exceptionLeve = preterLivreTest(livre, lecteur);
 
-				//WHEN		
-				bibliothecaire.RelancerEmprunteurEnRetard();
-				
-				//THEN
-				assertFalse(lecteur.aLivreEnRetard());
-				
-				// deuxième scenario : retard	
-				//GIVEN
-				LivreEmprunte livreEmprunte = bibliothecaire.retourneLivreEmprunte(lecteur);
-				LocalDate localDate = livreEmprunte.getDateEmprunt();
-				localDate= localDate.minusDays(16);
-				livreEmprunte.setDateEmprunt(localDate);
-				
-				//WHEN		
-				bibliothecaire.RelancerEmprunteurEnRetard();
-				
-				//THEN
-				assertTrue(lecteur.aLivreEnRetard());		
+		//WHEN		
+		bibliothecaire.RelancerEmprunteurEnRetard();
+		
+		//THEN
+		assertFalse(exceptionLeve);
+		assertFalse(lecteur.aLivreEnRetard());
+		
+		// deuxième scenario : retard	
+		//GIVEN
+		LivreEmprunte livreEmprunte = bibliothecaire.retourneLivreEmprunte(lecteur);
+		LocalDate localDate = livreEmprunte.getDateEmprunt();
+		localDate= localDate.minusDays(16);
+		livreEmprunte.setDateEmprunt(localDate);
+		
+		//WHEN		
+		bibliothecaire.RelancerEmprunteurEnRetard();
+		
+		//THEN
+		assertTrue(lecteur.aLivreEnRetard());		
 	}
 	
 	@Test
 	void testListerPersonnesAyantEmpruntesUnLivre() {
-		fail("Not yet implemented");
+		//GIVEN
+		bibliothecaire.supprimeTout();
+		Livre premierLivre = AjouteLivreAuCatalogue("nomAuteur", "Un titre présomptueux");
+		Livre deuxiemeLivre = AjouteLivreAuCatalogue("nomAuteur2", "Un titre présomptueux2");
+		
+		Lecteur lecteur = new Lecteur("nom", "prenom");
+		Lecteur lecteur2 = new Lecteur("nom", "prenom");
+		ArrayList<Lecteur> listeLecteurs = new ArrayList<Lecteur>();
+		listeLecteurs.add(lecteur);
+		listeLecteurs.add(lecteur2);
+		boolean exceptionLevee1 = preterLivreTest(premierLivre, lecteur);
+		boolean exceptionLevee2 = preterLivreTest(deuxiemeLivre, lecteur2);
+		
+		//WHEN
+		ArrayList<Lecteur> listeLecteurRetour = bibliothecaire.ListerPersonnesAyantEmpruntesUnLivre();
+		
+		//THEN
+		assertFalse(exceptionLevee1);
+		assertFalse(exceptionLevee2);
+		assertNotNull(listeLecteurs);
+		Collections.sort(listeLecteurs, new CompareLecteur());
+		Collections.sort(listeLecteurRetour, new CompareLecteur());
+		assertEquals(listeLecteurs,listeLecteurRetour);
+		System.out.println(listeLecteurs);
 	}
 	
 	@Test
 	void testListerLivresEmpruntesParEtudiant() {
-		fail("Not yet implemented");
-	}
+		//GIVEN
+		bibliothecaire.supprimeTout();
+		Livre premierLivre = AjouteLivreAuCatalogue("nomAuteur", "Un titre présomptueux");
+		Livre deuxiemeLivre = AjouteLivreAuCatalogue("nomAuteur2", "Un titre présomptueux2");
+		Livre troisiemeLivre = AjouteLivreAuCatalogue("nomAuteur3", "Un titre présomptueux3");
+		// !! à réfléchir -- lecteur n est pas utilisé hmm
+		Etudiant etudiant = new Etudiant("nom", "prenom");
+		Etudiant etudiant2 = new Etudiant("nom", "prenom");
+		Lecteur lecteur = new Lecteur("nom", "prenom");
+		ArrayList<Etudiant> listeLecteursEtudiants = new ArrayList<Etudiant>();
+		ArrayList<Lecteur> listeLecteurs = new ArrayList<Lecteur>();
+		listeLecteursEtudiants.add(etudiant);
+		listeLecteursEtudiants.add(etudiant2);
+		listeLecteurs.add(lecteur);
+		boolean exceptionLevee1 = preterLivreTest(premierLivre, etudiant);
+		boolean exceptionLevee2 = preterLivreTest(deuxiemeLivre, lecteur);
+		boolean exceptionLevee3 = preterLivreTest(troisiemeLivre, etudiant2);
+		
+		//WHEN
+		ArrayList<Etudiant> listeEtudiantRetour = bibliothecaire.ListerLivresEmpruntesParEtudiant();
+		
+		//THEN
+			assertFalse(exceptionLevee1);
+			assertFalse(exceptionLevee2);
+			assertFalse(exceptionLevee3);
+			assertNotNull(listeLecteurs);
+			Collections.sort(listeLecteursEtudiants, new CompareLecteur());
+			Collections.sort(listeEtudiantRetour, new CompareLecteur());
+			assertEquals(listeLecteurs,listeEtudiantRetour);
+			System.out.println(listeLecteurs);
+}
 	
 	@Test
     void testListerLivresEmpruntes() {
         //GIVEN
+		//!! pour tester il faut preter les livres mais d abord les ajouter dans le catalogue
         // est-ce que le given n'est plus utile si on utilise directement getLivresEmpruntes()?
         Auteur auteurA = new Auteur("nomAuteur1");
         String titreA = "Un titre1";
@@ -292,7 +354,7 @@ class BibliothecaireTest {
 		Auteur auteur = new Auteur("nomAuteur");
 		String titre = "Un titre pour ce test";
 		Livre livre = new  Livre(auteur, titre);
-		bibliothecaire.preterLivre(livre, lecteur);
+		boolean exceptionLevee1 = preterLivreTest(livre, lecteur);
 		
 		LivreEmprunte livreEmprunte = bibliothecaire.retourneLivreEmprunte(lecteur);
 		LocalDate localDate = livreEmprunte.getDateEmprunt().minusDays(16);
@@ -303,6 +365,7 @@ class BibliothecaireTest {
 		bibliothecaire.EnvoyerAmendeRetardaire();
 		
 		//THEN
+		assertFalse(exceptionLevee1);
 		assertTrue(lecteur.aLivreEnRetard());
 		assertNotNull(lecteur.getAmende());
 		assertTrue((lecteur.getAmende().getAmende()) == new Amende(Period.between(localDate, LocalDate.now()).getDays()).getAmende());
@@ -316,7 +379,7 @@ class BibliothecaireTest {
 		Auteur auteur = new Auteur("nomAuteur");
 		String titre = "Un titre";
 		Livre livre = new  Livre(auteur, titre);
-		bibliothecaire.preterLivre(livre, lecteur);
+		boolean exceptionLevee1 = preterLivreTest(livre, lecteur);
 		
 		LivreEmprunte livreEmprunte = bibliothecaire.retourneLivreEmprunte(lecteur);
 		LocalDate localDate = livreEmprunte.getDateEmprunt().minusDays(16);
@@ -329,8 +392,35 @@ class BibliothecaireTest {
 		bibliothecaire.EncaisserAmendeRetardaire(lecteur);
 		
 		//THEN
+		assertFalse(exceptionLevee1);
 		assertNull(lecteur.getAmende());
 		assertTrue(bibliothecaire.getTresorerie() > ancienMontant);
 	}
 
+	private boolean preterLivreTest(Livre ancienLivre, Lecteur lecteur) {
+		
+		boolean exceptionLeve=false;
+		try
+		{
+			//WHEN
+			bibliothecaire.preterLivre(ancienLivre, lecteur);			
+		}
+		catch(Exception e)
+		{
+			exceptionLeve=true;
+		}
+		
+		return exceptionLeve;
+	}
+	
+	private Livre creerLivre(String nomAuteur, String titreLivre){
+		Auteur auteur=new Auteur(nomAuteur);
+		return new Livre(auteur, titreLivre);
+	}
+	
+	private Livre AjouteLivreAuCatalogue(String nomAuteur, String titreLivre){
+		Livre livre = creerLivre(nomAuteur, titreLivre);
+		bibliothecaire.ajouterLivre(livre);
+		return livre;
+	}
 }
