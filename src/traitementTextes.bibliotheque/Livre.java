@@ -1,6 +1,7 @@
 package traitementTextes.bibliotheque;
 
 import java.io.Serializable;
+import java.util.Comparator;
 import java.util.function.BooleanSupplier;
 
 public class Livre implements Serializable  {
@@ -90,7 +91,10 @@ public class Livre implements Serializable  {
 	public void setTheme(String theme) {
 		this.theme = theme;
 	}
+}
 
-
-
+class CompareLivre implements Comparator<Livre>{
+	public int compare(Livre livre1, Livre livre2) {
+		return livre1.getTitre().compareTo(livre2.getTitre());
+	}
 }

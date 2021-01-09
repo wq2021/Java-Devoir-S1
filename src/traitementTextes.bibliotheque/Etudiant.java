@@ -25,4 +25,8 @@ public class Etudiant extends Lecteur {
 		this.numeroEtudiant = numeroEtudiant;
 	}
 
+	@Override
+	public CategorieSocioProfessionelle GetCategorie() {
+		return CategorieSocioProfessionelle.Etudiant;
+	}
 }

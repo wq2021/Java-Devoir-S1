@@ -2,7 +2,13 @@ package traitementTextes.bibliotheque;
 
 import java.util.Comparator;
 
-public class Lecteur {
+enum CategorieSocioProfessionelle
+{
+	Travailleur,
+	Etudiant
+};
+
+public abstract class Lecteur {
 	
 	private String nom;
 	private String prenom;
@@ -14,6 +20,8 @@ public class Lecteur {
 		this.nom = nom;
 		this.prenom = prenom;
 	}
+	
+	abstract public CategorieSocioProfessionelle GetCategorie();
 	
 	public String getNom() {
 		return nom;

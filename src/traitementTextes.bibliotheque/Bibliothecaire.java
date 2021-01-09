@@ -1,8 +1,6 @@
 package traitementTextes.bibliotheque;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.Period;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,13 +35,8 @@ public class Bibliothecaire {
 		}
 	}
 
-	public String listerOeuvresAuteur(Auteur auteur) {
-		ArrayList<Livre> livres= catalogue.get(auteur);
-		String titreDesLivres="";
-		for (Livre livre : livres) {
-			titreDesLivres+=livre.getTitre()+ "\n";
-		}
-		return "L'auteur "+auteur.getNom()+" a ecrit "+livres.size() +" livres:\n"+ titreDesLivres;
+	public ArrayList<Livre> listerOeuvresAuteur(Auteur auteur) {
+		return catalogue.get(auteur);
 	}
 	
 	public void enleverLivre(Livre ancienLivre) {
@@ -53,9 +46,10 @@ public class Bibliothecaire {
 	}
 	
 	public void preterLivre(Livre livre, Lecteur lecteur) throws Exception {
-		VerifierSiLivreExisteDansCatalogue(livre);
-		VerifierSiLecteurADejaEmprunteLivre(lecteur);
-		VerifierSiLivreDejaEmprunte(livre);
+		BibliothecaireVerificateur.VerifierSiLivreExisteDansCatalogue(getCatalogue(),livre);
+		LivreEmprunte livreEmprunteParLecteur = retourneLivreEmprunte(lecteur);
+		BibliothecaireVerificateur.VerifierSiLecteurADejaEmprunteLivre(lecteur, livreEmprunteParLecteur);
+		BibliothecaireVerificateur.VerifierSiLivreDejaEmprunte(getLivresEmpruntes(), livre);
 		
 		LivreEmprunte livreEmprunte = new LivreEmprunte();
 		livreEmprunte.setNbJourEmprunt(getNbJourEmprunt());
@@ -85,13 +79,11 @@ public class Bibliothecaire {
 		return listeLecteur;
 	}
 	
-	
 	public ArrayList<Etudiant> ListerLivresEmpruntesParEtudiant() {
 		ArrayList<Etudiant> listeEtudiant= new ArrayList<Etudiant>();
-		for(LivreEmprunte livreEmprunte : getLivresEmpruntes())
-		{
+		for(LivreEmprunte livreEmprunte : getLivresEmpruntes()){
 			Lecteur lecteur = livreEmprunte.getLecteur();
-			if (lecteur instanceof Etudiant) {
+			if (lecteur.GetCategorie() == CategorieSocioProfessionelle.Etudiant) {
 				listeEtudiant.add((Etudiant)lecteur);				
 			}
 		}
@@ -102,56 +94,51 @@ public class Bibliothecaire {
 	public ArrayList<Livre> listerLivresEmpruntes() {
         ArrayList<Livre> listeLivres = new ArrayList<Livre>();
         for(LivreEmprunte livreEmprunte: getLivresEmpruntes()) {
-            listeLivres.add(livreEmprunte);
+        	listeLivres.add(livreEmprunte.getLivre());
         }
         return listeLivres;
     }
 
-	public String listerLivresAnglais() {
-        String titresDesLivresAnglais = "";        
+	public ArrayList<Livre>  listerLivresAnglais() {
+		ArrayList<Livre> titresDesLivresAnglais = new ArrayList<Livre>();        
         for (Entry<Auteur, ArrayList<Livre>> paire : catalogue.entrySet()) {
-            ArrayList<Livre> listeLivres = paire.getValue();
-            for (Livre livre: listeLivres) {
+            for (Livre livre: paire.getValue()) {
                 if(livre.getLangue() == "en") {
-                    titresDesLivresAnglais += "Titre : " + livre.getTitre() + ", auteur : " + livre.getAuteur().getNom() + "\n";
-                    }
+                	titresDesLivresAnglais.add(livre);
+                }
             }
         }
-        return "Les livres anglais sont: \n" + titresDesLivresAnglais;
+        return titresDesLivresAnglais;
     }
 
 	public ArrayList<Livre> listerNbLivresEmpruntesPourUnAuteur(Auteur auteur) {
         ArrayList<Livre> listeLivresPourUnAuteur = new ArrayList<Livre>();
         for(LivreEmprunte livreEmprunte: getLivresEmpruntes()) {
-            if (livreEmprunte.getAuteur() == auteur) {
-                listeLivresPourUnAuteur.add(livreEmprunte);
+        	Livre livre = livreEmprunte.getLivre();
+        	if (livre.getAuteur() == auteur) {
+                listeLivresPourUnAuteur.add(livre);
             }
         }
         return listeLivresPourUnAuteur;
     }
 
-	public String TrouverLivreSurUnTheme(String theme) {
-		String listeLivres="";
-		int n = 0;
+	public ArrayList<Livre> TrouverLivreSurUnTheme(String theme) {
+		ArrayList<Livre> listeLivres=new ArrayList<Livre>();
 		for ( Entry<Auteur, ArrayList<Livre>> paire : catalogue.entrySet()) {
-            ArrayList<Livre> livres = paire.getValue();
-    		for (Livre livre : livres) {
+    		for (Livre livre : paire.getValue()) {
     			if (livre.getTheme() == theme) {
-    			listeLivres+=livre.getTitre()+ "\n";
-    			n+=1;
+    				listeLivres.add(livre);
     			}
     		}
 		}
-		return "Il y a "+n+" livres sur le theme \""+ theme +"\". Les livres sont : \n"+ listeLivres;
+		return listeLivres;
 	}
 
 	public void EnvoyerAmendeRetardaire() throws Exception {
 		for(LivreEmprunte livreEmprunte : getLivresEmpruntes())
 		{
 			Lecteur lecteur = livreEmprunte.getLecteur();
-			if (!lecteur.aLivreEnRetard()) {
-				throw new Exception("Le lecteur '" + lecteur.getNom() +"' n'est pas en retard.");
-			}
+			BibliothecaireVerificateur.VerifierLecteurARetard(lecteur);
 								
 			LocalDate dateEmprunt = livreEmprunte.getDateEmprunt();
 			Period p = Period.between(dateEmprunt, LocalDate.now());
@@ -161,15 +148,11 @@ public class Bibliothecaire {
 	}
 
 	public void EncaisserAmendeRetardaire(Lecteur lecteur) throws Exception {
-		Amende amende = lecteur.getAmende();
-		if (Objects.isNull(amende)){
-			throw new Exception("Le lecteur '" + lecteur.getNom() +"' n'a pas d'amende à payer.");
-		}
-		
+		BibliothecaireVerificateur.VerifierLecteurAAmende(lecteur);
+		Amende amende = lecteur.getAmende(); 
 		double amendePayee = lecteur.paieAmende(amende);
-		if (amendePayee != amende.getAmende()){
-			throw new Exception("Le lecteur '" + lecteur.getNom() +"' n'a pas payé le montant de l'amende. Montant dû : " + amende.getAmende() + ", montant payé : " + amendePayee);
-		}		
+		BibliothecaireVerificateur.VerifierLecteurAPayeBonMontantAmende(lecteur, amende, amendePayee);
+
 		tresorerie += amendePayee;
 		lecteur.setAmende(null);
 		lecteur.setLivreEnRetard(false);
@@ -205,27 +188,5 @@ public class Bibliothecaire {
 	public void supprimeTout() {
 		getCatalogue().clear();
 		getLivresEmpruntes().clear();
-	}
-	
-	void VerifierSiLivreDejaEmprunte(Livre livre) throws Exception {
-		// on vérifie que le livre n'a pas été déjà emprunté 
-		if (getLivresEmpruntes().contains(livre)){
-			throw new Exception("Le livre '" + livre.getTitre() +"' a déjà été emprunté."); 
-		}		
-	}
-
-	void VerifierSiLecteurADejaEmprunteLivre(Lecteur lecteur) throws Exception {
-		// on vérifie que le lecteur a déjà emprunté un livre 
-		if (Objects.isNull(retourneLivreEmprunte(lecteur))){
-			throw new Exception("Le lecteur '" + lecteur.getNom() +"' a déjà emprunté un livre.");
-		}		
-	}
-
-	void VerifierSiLivreExisteDansCatalogue(Livre livre) throws Exception {
-		// on vérifie si le livre existe bien dans le catalogue
-		ArrayList<Livre> listeLivre = getCatalogue().get(livre.getAuteur());
-		if (listeLivre.contains(livre)){
-			throw new Exception("Le livre '" + livre.getTitre() +"' n'est pas dans le catalogue.");
-		}		
 	}
 }
