@@ -33,17 +33,25 @@ class BibliothecaireTest {
 	
 	@Test
 	void testAfficherOeuvresAuteur() {
-		//GIVEN
+		
 		bibliothecaire.supprimeTout();
-		Livre livre = AjouteLivreAuCatalogue("nomAuteur", "Un titre présomptueux");
+		Livre livre = AjouteLivreAuCatalogue("Léon Tolsloï", "Anna Karénine");
+		Livre livre2 = AjouteLivreAuCatalogue("Léon Tolsloï", "Guerre et Paix");
+		Livre livre3 = AjouteLivreAuCatalogue("Victor Hugo", "Les Misérables");
+		Auteur auteurAchercher = new Auteur("Léon Tolsloï");
+		ArrayList<Livre> listeLivresTolstoi = new ArrayList<Livre>();
+		listeLivresTolstoi.add(livre);
+		listeLivresTolstoi.add(livre2);
 		
-		//WHEN
-		String listeOeuvres = bibliothecaire.listerOeuvresAuteur(livre.getAuteur());
-		
-		//THEN
-		assertNotNull(listeOeuvres);
-		assertTrue(listeOeuvres.contains(livre.getTitre()));
-		System.out.println(listeOeuvres);
+        //WHEN
+        ArrayList<Livre> listeLivresPourUnAuteur = bibliothecaire.listerOeuvresAuteur(auteurAchercher);
+
+        //THEN
+        assertNotNull(listeLivresPourUnAuteur);
+		Collections.sort(listeLivresPourUnAuteur, new CompareLivre());
+		Collections.sort(listeLivresTolstoi, new CompareLivre());
+		assertEquals(listeLivresPourUnAuteur, listeLivresTolstoi);
+		System.out.println("testAfficherOeuvresAuteur : Les livres écrits par "+ auteurAchercher.getNom() + " sont "+ toStringLivre(listeLivresPourUnAuteur));
 	}
 	
 	
@@ -51,7 +59,7 @@ class BibliothecaireTest {
 	void testAjouterLivre() {
 		//GIVEN
 		bibliothecaire.supprimeTout();
-		Livre nouveauLivre = AjouteLivreAuCatalogue("nomAuteur", "Un titre");
+		Livre nouveauLivre = creerLivre("nomAuteur", "Un titre");
 		int ancienMontant = bibliothecaire.getTresorerie();
 		
 		//WHEN
@@ -59,10 +67,12 @@ class BibliothecaireTest {
 		
 		//THEN
 		assertNotNull(nouveauLivre.getAuteur());
-		ArrayList<Livre> livresDidier = bibliothecaire.getCatalogue().get(auteur);
+		ArrayList<Livre> livresDidier = bibliothecaire.listerOeuvresAuteur(nouveauLivre.getAuteur());
 		assertNotNull(livresDidier);
-		assertTrue(livresDidier.contains(nouveauLivre));
+		assertEquals(livresDidier.size(), 1);
+		assertEquals(livresDidier.get(0), nouveauLivre);
 		assertTrue(bibliothecaire.getTresorerie() < ancienMontant);
+		System.out.println("testAjouterLivre: " + nouveauLivre.getTitre() + " a été bien ajouté.");
 	}
 
 	@Test
@@ -70,13 +80,17 @@ class BibliothecaireTest {
 		//GIVEN
 		bibliothecaire.supprimeTout();
 		Livre ancienLivre = AjouteLivreAuCatalogue("nomAuteur", "Un titre");
+		Livre ancienLivre2 = AjouteLivreAuCatalogue("nomAuteur", "Un titre2");
 		
 		//WHEN
 		bibliothecaire.enleverLivre(ancienLivre);
 		
 		//THEN
-		assertFalse(bibliothecaire.getCatalogue().get(ancienLivre.getAuteur()).contains(ancienLivre));
-		assertEquals(bibliothecaire.getCatalogue().get(ancienLivre.getAuteur()).size(), 0);
+		ArrayList<Livre> livres = bibliothecaire.listerOeuvresAuteur(ancienLivre.getAuteur());
+		assertNotNull(livres);
+		assertEquals(livres.size(), 1);
+		assertEquals(livres.get(0), ancienLivre2);
+		System.out.println("testEnleverLivre: " + ancienLivre.getTitre() + " a été bien enlevé.");
 	}
 
 	/*
@@ -120,28 +134,32 @@ class BibliothecaireTest {
 		assertTrue(Objects.nonNull(livreEmprunte));
 		Livre livreBiblio = livreEmprunte.getLivre();
 		assertEquals(livreBiblio,ancienLivre);
-		assertEquals(livreBiblio.getAuteur(), "nomAuteur");
+		assertEquals(livreBiblio.getAuteur().getNom(), "nomAuteur");
 		assertEquals(livreEmprunte.getDateEmprunt(),LocalDate.now());
 		assertEquals(livreEmprunte.getNbJourEmprunt(), bibliothecaire.getNbJourEmprunt());
 		assertEquals(livreEmprunte.getLecteur(),lecteur);
+		System.out.println("testPreterUnLivre: " + ancienLivre.getTitre() + " a été bien prêté.");
 			
 		// test si le livre a déjà été emprunté
 		// WHEN 
 		boolean exceptionLeveLivreDejaEmp = preterLivreTest(ancienLivre, lecteur2);
 		// THEN	
 		assertTrue(exceptionLeveLivreDejaEmp);
+		System.out.println("testPreterUnLivre Exception1: ATTENTION! " + ancienLivre.getTitre() + " a été déjà emprunté!!!");
 		
 		// test si le lecteur a déjà emprunté un livre 
 		//WHEN
 		boolean exceptionLeveLecteurDejaEmpr = preterLivreTest(ancienLivre2, lecteur);
 		//THEN
 		assertTrue(exceptionLeveLecteurDejaEmpr);
+		System.out.println("testPreterUnLivre Exception2: ATTENTION! " + lecteur.getNom() + " a déjà emprunté un livre!");
 		
 		// test si le livre existe bien dans le catalogue
 		//WHEN
 		boolean exceptionLeveLivreDansCat = preterLivreTest(ancienLivre4, lecteur2) ;
 		//THEN
 		assertTrue(exceptionLeveLivreDansCat);
+		System.out.println("testPreterUnLivre Exception3: ATTENTION! " + ancienLivre4.getTitre() + " n'existe pas dans le catalogue!");
 	
 	}
 	
@@ -160,6 +178,7 @@ class BibliothecaireTest {
 		//THEN
 		assertFalse(exceptionLeve);
 		assertFalse(lecteur.aLivreEnRetard());
+		System.out.println("testRelancerEmprunteurEnRetard var1: " + lecteur.getNom() + " n'est pas en retard.");
 		
 		// deuxième scenario : retard	
 		//GIVEN
@@ -172,7 +191,8 @@ class BibliothecaireTest {
 		bibliothecaire.RelancerEmprunteurEnRetard();
 		
 		//THEN
-		assertTrue(lecteur.aLivreEnRetard());		
+		assertTrue(lecteur.aLivreEnRetard());
+		System.out.println("testRelancerEmprunteurEnRetard var2: " + lecteur.getNom() + " est EN RETARD!");
 	}
 	
 	@Test
@@ -183,7 +203,7 @@ class BibliothecaireTest {
 		Livre deuxiemeLivre = AjouteLivreAuCatalogue("nomAuteur2", "Un titre présomptueux2");
 		
 		Lecteur lecteur = new Travailleur("nom", "prenom");
-		Lecteur lecteur2 = new Travailleur("nom", "prenom");
+		Lecteur lecteur2 = new Travailleur("nom2", "prenom2");
 		ArrayList<Lecteur> listeLecteurs = new ArrayList<Lecteur>();
 		listeLecteurs.add(lecteur);
 		listeLecteurs.add(lecteur2);
@@ -197,22 +217,24 @@ class BibliothecaireTest {
 		assertFalse(exceptionLevee1);
 		assertFalse(exceptionLevee2);
 		assertNotNull(listeLecteurs);
+		assertEquals(listeLecteurs.size(),listeLecteurRetour.size());
 		Collections.sort(listeLecteurs, new CompareLecteur());
 		Collections.sort(listeLecteurRetour, new CompareLecteur());
 		assertEquals(listeLecteurs,listeLecteurRetour);
-		System.out.println(listeLecteurs);
+		System.out.println("testListerPersonnesAyantEmpruntesUnLivre: Les lecteurs ayant emprunté un livre sont " + toStringLecteur(listeLecteurs));
 	}
 	
 	@Test
 	void testListerLivresEmpruntesParEtudiant() {
+		//PUNAISE pas etudiant mais livres ici!!!! à changer :'-( partout.
 		//GIVEN
 		bibliothecaire.supprimeTout();
 		Livre premierLivre = AjouteLivreAuCatalogue("nomAuteur", "Un titre présomptueux");
 		Livre deuxiemeLivre = AjouteLivreAuCatalogue("nomAuteur2", "Un titre présomptueux2");
 		Livre troisiemeLivre = AjouteLivreAuCatalogue("nomAuteur3", "Un titre présomptueux3");
 		Etudiant etudiant = new Etudiant("nom", "prenom");
-		Etudiant etudiant2 = new Etudiant("nom", "prenom");
-		Lecteur lecteur = new Travailleur("nom", "prenom");
+		Etudiant etudiant2 = new Etudiant("nom2", "prenom2");
+		Lecteur lecteur = new Travailleur("nom3", "prenom3");
 		ArrayList<Etudiant> listeLecteursEtudiants = new ArrayList<Etudiant>();
 		listeLecteursEtudiants.add(etudiant);
 		listeLecteursEtudiants.add(etudiant2);
@@ -231,7 +253,7 @@ class BibliothecaireTest {
 		Collections.sort(listeLecteursEtudiants, new CompareLecteur());
 		Collections.sort(listeEtudiantRetour, new CompareLecteur());
 		assertEquals(listeLecteursEtudiants,listeEtudiantRetour);
-		System.out.println(listeLecteursEtudiants);
+		System.out.println(toStringEtudiant(listeEtudiantRetour));
 }
 	
 	@Test
@@ -250,7 +272,7 @@ class BibliothecaireTest {
         //J'ai mis "assetFalse" au debut, mais apres je m'apercois qu'il n'y a pas de livres dans getLivresEmpruntes()
         assertTrue(listeLivres.isEmpty());
         assertNotNull(listeLivres);
-        System.out.println(listeLivres);
+        System.out.println("testListerLivresEmpruntes: Les livres empruntés sont " + toStringLivre(listeLivres));
 
     }
 	
@@ -279,7 +301,7 @@ class BibliothecaireTest {
 		Collections.sort(listeLivreAnglaisRef, new CompareLivre());
 		Collections.sort(listeLivreAnglais, new CompareLivre());
 		assertEquals(listeLivreAnglaisRef, listeLivreAnglais);
-		System.out.println(listeLivreAnglais);
+		System.out.println("testListerLivresAnglais: Les livres en ENG sont " + toStringLivre(listeLivreAnglais));
     }
 	
 	@Test
@@ -288,21 +310,23 @@ class BibliothecaireTest {
 		bibliothecaire.supprimeTout();
 		Livre livre = AjouteLivreAuCatalogue("Léon Tolsloï", "Anna Karénine");
 		Livre livre2 = AjouteLivreAuCatalogue("Léon Tolsloï", "Guerre et Paix");
-		//Livre livre3 = AjouteLivreAuCatalogue("Victor Hugo", "Les Misérables");
-		Auteur auteurAchercher = new Auteur("Léon Tolsloï");
-		ArrayList<Livre> listeLivresTolstoi = new ArrayList<Livre>();
-		listeLivresTolstoi.add(livre);
-		listeLivresTolstoi.add(livre2);
-		
+		Livre livre3 = AjouteLivreAuCatalogue("Victor Hugo", "Les Misérables");
+		Lecteur lecteur = new Travailleur("nom", "prenom");
+		Lecteur lecteur2 = new Travailleur("nom2", "prenom2");
+		Lecteur lecteur3 = new Etudiant("nom3", "prenom3");
+		boolean exceptionLevee1 = preterLivreTest(livre, lecteur);
+		boolean exceptionLevee2 = preterLivreTest(livre2, lecteur2);
+		boolean exceptionLevee3 = preterLivreTest(livre3, lecteur3);
+				
         //WHEN
-        ArrayList<Livre> listeLivresPourUnAuteur = bibliothecaire.listerNbLivresEmpruntesPourUnAuteur(auteurAchercher);
+        int nbLivreRetour = bibliothecaire.listerNbLivresEmpruntesPourUnAuteur(livre.getAuteur());
 
         //THEN
-        assertNotNull(listeLivresPourUnAuteur);
-		Collections.sort(listeLivresPourUnAuteur, new CompareLivre());
-		Collections.sort(listeLivresTolstoi, new CompareLivre());
-		assertEquals(listeLivresPourUnAuteur, listeLivresTolstoi);
-		System.out.println(listeLivresPourUnAuteur);
+        assertFalse(exceptionLevee1);
+		assertFalse(exceptionLevee2);
+		assertFalse(exceptionLevee3);
+		assertEquals(nbLivreRetour, 2);
+		System.out.println("testListerNbLivresEmpruntesPourUnAuteur: Nombre de livres pour " + livre.getAuteur() + "est" + nbLivreRetour);
     }
 	
 	@Test
@@ -313,11 +337,11 @@ class BibliothecaireTest {
 		Livre livreA = AjouteLivreAuCatalogue("Alexandre Pouchkine", "La fille du capitaine");
         livreA.setTheme(theme);
         Livre livreA1 = AjouteLivreAuCatalogue("BlahBlah", "Apprendre à coder en JAVA");
-        livreA1.setLangue("programmation");
+        livreA1.setTheme("programmation");
         Livre livreB = AjouteLivreAuCatalogue("Gustav Flaubert", "Madame Bovary");
         livreB.setTheme(theme);
         Livre livreC = AjouteLivreAuCatalogue("Jean-Claude Carrière", "Le Mahabharata");
-        livreC.setLangue("vie");
+        livreC.setTheme("vie");
         ArrayList<Livre> listeLivreUnThemeRef = new ArrayList<Livre>();
         listeLivreUnThemeRef.add(livreA);
         listeLivreUnThemeRef.add(livreB);
@@ -330,7 +354,7 @@ class BibliothecaireTest {
 		Collections.sort(listeLivreUnThemeRef, new CompareLivre());
 		Collections.sort(listeLivreUnThemeRetour, new CompareLivre());
 		assertEquals(listeLivreUnThemeRef, listeLivreUnThemeRetour);
-		System.out.println(listeLivreUnThemeRetour);
+		System.out.println("testTrouverLivreSurUnTheme: Les livres ayant le même theme sont " + toStringLivre(listeLivreUnThemeRetour));
 	}
 	
 	@Test
@@ -363,6 +387,7 @@ class BibliothecaireTest {
 		assertTrue(lecteur.aLivreEnRetard());
 		assertNotNull(lecteur.getAmende());
 		assertTrue((lecteur.getAmende().getAmende()) == new Amende(Period.between(localDate, LocalDate.now()).getDays()).getAmende());
+		System.out.println("testEnvoyerAmendeRetardaire: ");
 	}
 	
 	@Test
@@ -406,6 +431,7 @@ class BibliothecaireTest {
 		assertFalse(exceptionLeveeSurEnvoyerAmendeRetardaire);
 		assertNull(lecteur.getAmende());
 		assertTrue(bibliothecaire.getTresorerie() > ancienMontant);
+		System.out.println("testEncaisserAmendeRetardaire: ");
 	}
 
 	private boolean preterLivreTest(Livre ancienLivre, Lecteur lecteur) {
@@ -418,7 +444,8 @@ class BibliothecaireTest {
 		}
 		catch(Exception e)
 		{
-			exceptionLeve=true;
+			System.out.println(e);
+			exceptionLeve = true;
 		}
 		
 		return exceptionLeve;
@@ -433,5 +460,44 @@ class BibliothecaireTest {
 		Livre livre = creerLivre(nomAuteur, titreLivre);
 		bibliothecaire.ajouterLivre(livre);
 		return livre;
+	}
+	
+	String toStringLivre(ArrayList<Livre> listeLivre)
+	{
+		String retour = "[";
+		for (Livre livre : listeLivre) {
+			if (retour != "[") {
+				retour +=", ";
+			}
+			retour += livre.getTitre();
+		}
+		retour+="]";
+		return retour;
+	}
+	
+	String toStringLecteur(ArrayList<Lecteur> listeLecteur)
+	{
+		String retour = "[";
+		for (Lecteur lecteur : listeLecteur) {
+			if (retour != "[") {
+				retour +=", ";
+			}
+			retour += lecteur.getNom();
+		}
+		retour+="]";
+		return retour;
+	}
+	
+	String toStringEtudiant(ArrayList<Etudiant> listeEtudiant)
+	{
+		String retour = "[";
+		for (Lecteur etudiant : listeEtudiant) {
+			if (retour != "[") {
+				retour +=", ";
+			}
+			retour += etudiant.getNom();
+		}
+		retour+="]";
+		return retour;
 	}
 }

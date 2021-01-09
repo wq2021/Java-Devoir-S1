@@ -21,6 +21,18 @@ public abstract class Lecteur {
 		this.prenom = prenom;
 	}
 	
+	@Override
+	public boolean equals(Object lecteur) {
+		if (this == lecteur) {
+			return true;
+		}
+		if (lecteur instanceof Lecteur) {
+			return this.getNom().equals(((Lecteur) lecteur).getNom());
+		}
+		return false;
+
+	}
+	
 	abstract public CategorieSocioProfessionelle GetCategorie();
 	
 	public String getNom() {

@@ -111,15 +111,15 @@ public class Bibliothecaire {
         return titresDesLivresAnglais;
     }
 
-	public ArrayList<Livre> listerNbLivresEmpruntesPourUnAuteur(Auteur auteur) {
-        ArrayList<Livre> listeLivresPourUnAuteur = new ArrayList<Livre>();
+	public int listerNbLivresEmpruntesPourUnAuteur(Auteur auteur) {
+        int n=0;
         for(LivreEmprunte livreEmprunte: getLivresEmpruntes()) {
         	Livre livre = livreEmprunte.getLivre();
-        	if (livre.getAuteur() == auteur) {
-                listeLivresPourUnAuteur.add(livre);
+        	if (livre.getAuteur().equals(auteur)) {
+                n++;
             }
         }
-        return listeLivresPourUnAuteur;
+        return n;
     }
 
 	public ArrayList<Livre> TrouverLivreSurUnTheme(String theme) {

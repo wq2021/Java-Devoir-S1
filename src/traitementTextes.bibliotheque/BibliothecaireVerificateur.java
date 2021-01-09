@@ -8,15 +8,18 @@ import java.util.Objects;
 public class BibliothecaireVerificateur {
 	
 	static public void VerifierSiLivreDejaEmprunte(HashSet<LivreEmprunte> livresEmpruntes, Livre livre) throws Exception {
-		// on vérifie que le livre n'a pas été déjà emprunté 
-		if (livresEmpruntes.contains(livre)){
-			throw new Exception("Le livre '" + livre.getTitre() +"' a déjà été emprunté."); 
-		}		
+		for(LivreEmprunte livreEmprunte : livresEmpruntes){
+			// on vérifie que le livre n'a pas été déjà emprunté
+			Livre livreCourant = livreEmprunte.getLivre();
+			if (livreCourant.equals(livre)){
+				throw new Exception("Le livre '" + livre.getTitre() +"' a déjà été emprunté."); 
+			}
+		}
 	}
 
 	static public void VerifierSiLecteurADejaEmprunteLivre(Lecteur lecteur, LivreEmprunte livreEmprunte) throws Exception {
 		// on vérifie que le lecteur a déjà emprunté un livre 
-		if (Objects.isNull(livreEmprunte)){
+		if (Objects.nonNull(livreEmprunte)){
 			throw new Exception("Le lecteur '" + lecteur.getNom() +"' a déjà emprunté un livre.");
 		}		
 	}
@@ -24,7 +27,7 @@ public class BibliothecaireVerificateur {
 	static public void VerifierSiLivreExisteDansCatalogue(HashMap<Auteur, ArrayList<Livre>> catalogue, Livre livre) throws Exception {
 		// on vérifie si le livre existe bien dans le catalogue
 		ArrayList<Livre> listeLivre = catalogue.get(livre.getAuteur());
-		if (listeLivre.contains(livre)){
+		if (!listeLivre.contains(livre)){
 			throw new Exception("Le livre '" + livre.getTitre() +"' n'est pas dans le catalogue.");
 		}		
 	}

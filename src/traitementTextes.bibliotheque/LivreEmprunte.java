@@ -12,6 +12,22 @@ public class LivreEmprunte {
 	public LivreEmprunte() {
 	}
 	
+	@Override
+	public boolean equals(Object livreEmprunte) {
+		if (this == livreEmprunte) {
+			return true;
+		}
+		if (livreEmprunte instanceof LivreEmprunte) {
+			return ((this.getLivre().equals(((LivreEmprunte) livreEmprunte).getLivre())));
+		}
+		return false;
+
+	}
+	
+	public int hashCode() {
+		return livre.hashCode() + lecteur.hashCode();
+	}
+	
 	public LocalDate getDateEmprunt() {
 		return dateEmprunt;
 	}
