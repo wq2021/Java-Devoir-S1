@@ -1,7 +1,7 @@
 package traitementTextes.bibliotheque;
 
 /**
-* 
+* Classe qui présente les informations sur les amendes
 * @author Anna Niskovskikh, Anaëlle Pierredon et Qi Wang
 * @version 1.3
 */

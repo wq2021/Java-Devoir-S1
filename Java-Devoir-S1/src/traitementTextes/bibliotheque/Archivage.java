@@ -1,7 +1,7 @@
 package traitementTextes.bibliotheque;
 
 /**
-* 
+* Classe qui permet d'initialiser ou d'archiver le catalogue.
 * @author Sandrine Cariteau
 */
 

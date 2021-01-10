@@ -1,5 +1,11 @@
 package traitementTextes.bibliotheque;
 
+/**
+* Classe qui contient les tests de la classe bibliothecaire
+* @author Anna Niskovskikh, Anaëlle Pierredon et Qi Wang
+* @version 1.9
+*/
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -172,7 +178,7 @@ class BibliothecaireTest {
 		boolean exceptionLeve = preterLivreTest(livre, lecteur);
 
 		//WHEN		
-		bibliothecaire.RelancerEmprunteurEnRetard();
+		bibliothecaire.relancerEmprunteurEnRetard();
 		
 		//THEN
 		assertFalse(exceptionLeve);
@@ -187,7 +193,7 @@ class BibliothecaireTest {
 		livreEmprunte.setDateEmprunt(localDate);
 		
 		//WHEN		
-		bibliothecaire.RelancerEmprunteurEnRetard();
+		bibliothecaire.relancerEmprunteurEnRetard();
 		
 		//THEN
 		assertTrue(lecteur.aLivreEnRetard());
@@ -210,7 +216,7 @@ class BibliothecaireTest {
 		boolean exceptionLevee2 = preterLivreTest(deuxiemeLivre, lecteur2);
 		
 		//WHEN
-		ArrayList<Lecteur> listeLecteurRetour = bibliothecaire.ListerPersonnesAyantEmpruntesUnLivre();
+		ArrayList<Lecteur> listeLecteurRetour = bibliothecaire.listerPersonnesAyantEmpruntesUnLivre();
 		
 		//THEN
 		assertFalse(exceptionLevee1);
@@ -241,7 +247,7 @@ class BibliothecaireTest {
         boolean exceptionLevee3 = preterLivreTest(troisiemeLivre, etudiant2);
 
         //WHEN
-        ArrayList<Livre> listeLivresEtudRetour = bibliothecaire.ListerLivresEmpruntesParEtudiant();
+        ArrayList<Livre> listeLivresEtudRetour = bibliothecaire.listerLivresEmpruntesParEtudiant();
 
         //THEN
         assertFalse(exceptionLevee1);
@@ -353,7 +359,7 @@ class BibliothecaireTest {
         listeLivreUnThemeRef.add(livreB);
 		
 		//WHEN
-		ArrayList<Livre> listeLivreUnThemeRetour = bibliothecaire.TrouverLivreSurUnTheme(theme);
+		ArrayList<Livre> listeLivreUnThemeRetour = bibliothecaire.trouverLivreSurUnTheme(theme);
 		
 		//THEN
 		assertNotNull(listeLivreUnThemeRetour);
@@ -374,13 +380,13 @@ class BibliothecaireTest {
 		LivreEmprunte livreEmprunte = bibliothecaire.retourneLivreEmprunte(lecteur);
 		LocalDate localDate = livreEmprunte.getDateEmprunt().minusDays(16);
 		livreEmprunte.setDateEmprunt(localDate);
-		bibliothecaire.RelancerEmprunteurEnRetard();
+		bibliothecaire.relancerEmprunteurEnRetard();
 		
 		//WHEN
 		boolean exceptionLeveeSurEnvoyerAmendeRetardaire = false;
 		try 
 		{
-			bibliothecaire.EnvoyerAmendeRetardaire();
+			bibliothecaire.envoyerAmendeRetardaire();
 		}
 		catch(Exception ex)
 		{
@@ -408,12 +414,12 @@ class BibliothecaireTest {
 		LivreEmprunte livreEmprunte = bibliothecaire.retourneLivreEmprunte(lecteur);
 		LocalDate localDate = livreEmprunte.getDateEmprunt().minusDays(16);
 		livreEmprunte.setDateEmprunt(localDate);
-		bibliothecaire.RelancerEmprunteurEnRetard();
+		bibliothecaire.relancerEmprunteurEnRetard();
 		
 		boolean exceptionLeveeSurEnvoyerAmendeRetardaire = false;
 		try
 		{
-			bibliothecaire.EnvoyerAmendeRetardaire();
+			bibliothecaire.envoyerAmendeRetardaire();
 		}
 		catch(Exception e)
 		{
@@ -424,7 +430,7 @@ class BibliothecaireTest {
 		boolean exceptionLeveeSurEncaisserAmendeRetardaire = false;
 		try
 		{
-		bibliothecaire.EncaisserAmendeRetardaire(lecteur);
+		bibliothecaire.encaisserAmendeRetardaire(lecteur);
 		}
 		catch(Exception e)
 		{

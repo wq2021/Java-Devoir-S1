@@ -1,7 +1,7 @@
 package traitementTextes.bibliotheque;
 
 /**
-* 
+* Classe qui contient les informations sur les auteurs et les méthodes associées.
 * @author Sandrine Cariteau
 */
 

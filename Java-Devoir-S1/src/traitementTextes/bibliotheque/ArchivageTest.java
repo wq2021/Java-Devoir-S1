@@ -1,7 +1,7 @@
 package traitementTextes.bibliotheque;
 
 /**
-* 
+* Classe qui contient les tests de la classe archivage
 * @author Sandrine Cariteau
 */
 

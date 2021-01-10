@@ -1,7 +1,7 @@
 package traitementTextes.bibliotheque;
 
 /**
-* 
+* Classe qui contient des méthodes permettant de vérifier des informations.
 * @author Anna Niskovskikh, Anaëlle Pierredon et Qi Wang
 * @version 1.3
 */
