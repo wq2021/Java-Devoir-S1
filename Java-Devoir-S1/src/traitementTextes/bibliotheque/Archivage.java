@@ -1,5 +1,10 @@
 package traitementTextes.bibliotheque;
 
+/**
+* 
+* @author Sandrine Cariteau
+*/
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -15,13 +20,18 @@ import traitementTextes.Serialisateur;
 public class Archivage {
 
 
-	
+	/**
+	 * Méthode qui permet de créer un fichier archive à partir du catalogue.
+	 * @param catalogue
+	 * @param pathFichierArchive
+	 */
 	public void archiverCatalogue(HashMap<Auteur, ArrayList<Livre>> catalogue, String pathFichierArchive) {
 		
 		Serialisateur.serialiseObject(pathFichierArchive, catalogue);
 		
 	}
 	/**
+	 * Méthode qui permet d'initialiser le catalogue à partir d'un fichier xml.
 	 * @param pathFichierXml
 	 * @param catalogue
 	 */

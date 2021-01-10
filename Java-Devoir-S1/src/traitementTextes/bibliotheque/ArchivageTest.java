@@ -1,5 +1,10 @@
 package traitementTextes.bibliotheque;
 
+/**
+* 
+* @author Sandrine Cariteau
+*/
+
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.*;
 
