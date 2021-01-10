@@ -25,6 +25,7 @@ public class Auteur implements Serializable {
 	 * Méthode equals pour les objets de la classe Auteur. 
 	 * Elle vérifie que les noms de deux objets de la classe Auteur sont égaux.
 	 * @param anObject
+	 * @return true s'ils sont égaux, false sinon
 	 */
 	@Override
 	public boolean equals(Object anObject) {
@@ -39,7 +40,8 @@ public class Auteur implements Serializable {
 	}
 	
 	/**
-	 * 
+	 * Méthode qui permet de vérifier que deux objets renvoient la même valeur.
+	 * @return true s'ils sont égaux, false sinon
 	 */
 	public int hashCode() {
 		return nom.hashCode();

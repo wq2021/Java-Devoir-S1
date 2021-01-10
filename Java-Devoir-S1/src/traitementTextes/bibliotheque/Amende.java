@@ -26,6 +26,7 @@ public class Amende {
     * Méthode pour calculer le montant de l'amende en fonction du nombre de jours en retard.
     * Le prix par jour est fixé à 1 euro.
     * @param nbJourEnRetard Le nombre de jours de retard dans le rendu du livre.
+    * @return le montant de l'amende
     */
 	public int calculer(int nbJourEnRetard) {
 		return prixParJour * nbJourEnRetard;
