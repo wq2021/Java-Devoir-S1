@@ -332,7 +332,7 @@ class BibliothecaireTest {
 		assertFalse(exceptionLevee2);
 		assertFalse(exceptionLevee3);
 		assertEquals(nbLivreRetour, 2);
-		System.out.println("testListerNbLivresEmpruntesPourUnAuteur: Nombre de livres pour " + livre.getAuteur().getNom() + "est " + nbLivreRetour);
+		System.out.println("testListerNbLivresEmpruntesPourUnAuteur: Nombre de livres pour " + livre.getAuteur().getNom() + " est " + nbLivreRetour);
     }
 	
 	@Test
