@@ -79,17 +79,16 @@ public class Bibliothecaire {
 		return listeLecteur;
 	}
 	
-	public ArrayList<Etudiant> ListerLivresEmpruntesParEtudiant() {
-		ArrayList<Etudiant> listeEtudiant= new ArrayList<Etudiant>();
-		for(LivreEmprunte livreEmprunte : getLivresEmpruntes()){
-			Lecteur lecteur = livreEmprunte.getLecteur();
-			if (lecteur.GetCategorie() == CategorieSocioProfessionelle.Etudiant) {
-				listeEtudiant.add((Etudiant)lecteur);				
-			}
-		}
-			
-		return listeEtudiant;
-	}
+	public ArrayList<Livre> ListerLivresEmpruntesParEtudiant() {
+        ArrayList<Livre> listeLivres = new ArrayList<Livre>();
+        for(LivreEmprunte livreEmprunte : getLivresEmpruntes()){
+            Lecteur lecteur = livreEmprunte.getLecteur();
+            if (lecteur.GetCategorie() == CategorieSocioProfessionelle.Etudiant) {
+                listeLivres.add(livreEmprunte.getLivre());
+            }
+        }
+        return listeLivres;
+    }
 	
 	public ArrayList<Livre> listerLivresEmpruntes() {
         ArrayList<Livre> listeLivres = new ArrayList<Livre>();
