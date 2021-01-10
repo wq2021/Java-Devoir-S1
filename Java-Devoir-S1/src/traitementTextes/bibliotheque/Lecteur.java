@@ -2,11 +2,22 @@ package traitementTextes.bibliotheque;
 
 import java.util.Comparator;
 
+/**
+ * Énumérer 2 catégories socio-professionnelles pour le lecteur
+ * donc Travailleur et Etudiant.
+ */
+
 enum CategorieSocioProfessionelle
 {
 	Travailleur,
 	Etudiant
 };
+
+/**
+ * Classe qui présente les informations du lecteur
+ * @author Anna Niskovskikh, Anaëlle Pierredon et Qi Wang
+ * @version 1.4
+ */
 
 public abstract class Lecteur {
 	
@@ -16,11 +27,23 @@ public abstract class Lecteur {
 	private Amende amende;
 	private boolean livreEnRetard;
 
+	/**
+	 * Constructeur de la classe Lecteur
+	 * @param nom Nom de famille de lecteur
+	 * @param prenom prenom de lecteur
+	 */
 	public Lecteur(String nom, String prenom ) {
 		this.nom = nom;
 		this.prenom = prenom;
 	}
-	
+
+	/**
+	 * Méthode equals pour vérifier qu'un objet donné, donc lecteur est bien une instance de Lecteur 
+	 * et ensuite vérifier que cette instance est de type Lecteur
+	 * @param lecteur Un objet lecteur
+	 * @return true L'objet est bien une instance de Lecteur ou Cette instance est de type Lecteur.
+	 * @return false Si l'objet n'est pas une instance de Lecteur, et l'instance n'est pas de type Lecteur.
+	 */
 	@Override
 	public boolean equals(Object lecteur) {
 		if (this == lecteur) {
@@ -73,6 +96,11 @@ public abstract class Lecteur {
 	}
 }
 
+/**
+ * Classe pour comparer deux lecteurs 
+ * au niveau de leur nom en ASCII
+ * @return lecteur1.getNom().compareTo(lecteur2.getNom())
+ */
 class CompareLecteur implements Comparator<Lecteur>{
 	public int compare(Lecteur lecteur1, Lecteur lecteur2) {
 		return lecteur1.getNom().compareTo(lecteur2.getNom());

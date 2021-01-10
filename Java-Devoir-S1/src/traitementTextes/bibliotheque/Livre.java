@@ -4,11 +4,14 @@ import java.io.Serializable;
 import java.util.Comparator;
 import java.util.function.BooleanSupplier;
 
+/**
+ * Classe qui présente les informations pour le livre
+ * @author Anna Niskovskikh, Anaëlle Pierredon et Qi Wang
+ * @version 1.2
+ */
+
 public class Livre implements Serializable  {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	private Auteur auteur;
 	private String titre;
@@ -18,11 +21,25 @@ public class Livre implements Serializable  {
 	private String langue;
 	private String theme;
 	
+	/**
+	 * Constructeur de la classe Livre
+	 * @param auteur Auteur du livre
+	 * @param titre Titre du livre
+	 */
+	
 	public Livre(Auteur auteur,String titre) {
 		this.auteur=auteur;
 		this.titre=titre;
 	}
 	
+	/**
+	 * Méthode equals pour vérifier qu'un objet donné, donc livre est bien une instance de Livre
+	 * et ensuite vérifier que cette instance est de type Livre
+	 * @param livre Un objet livre
+	 * @return true L'objet est bien une instance de Livre ou Cette instance est de type Livre.
+	 * @return false Si l'objet n'est pas une instance de Livre, et l'instance n'est pas de type Livre.
+	 * 
+	 */
 	@Override
 	public boolean equals(Object livre) {
 		if (this == livre) {
@@ -93,6 +110,11 @@ public class Livre implements Serializable  {
 	}
 }
 
+/**
+ * Classe pour comparer deux livres
+ * au niveau de leur titre en ASCII
+ * @return livre1.getTitre().compareTo(livre2.getTitre())
+ */
 class CompareLivre implements Comparator<Livre>{
 	public int compare(Livre livre1, Livre livre2) {
 		return livre1.getTitre().compareTo(livre2.getTitre());
